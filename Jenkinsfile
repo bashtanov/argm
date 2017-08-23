@@ -17,7 +17,7 @@ node ('docker') {
     dir ("${WORKSPACE}")
     {
         stage ('Upload to repository') {
-            sh 'for deb in *.deb; do curl -u "aptly:ohV9oxo3at5leeMoh2ahNiochahpaive" https://aptly.stage.brandwatch.net/packages -F "my_file=@${deb}" -F "name=${deb}"; done';
+            sh 'for deb in postgresql-argm*.deb; do curl -u "aptly:ohV9oxo3at5leeMoh2ahNiochahpaive" https://aptly.stage.brandwatch.net/packages -F "my_file=@${deb}" -F "name=${deb}"; done';
         }
         stage ('Cleanup') {
             cleanWs();
