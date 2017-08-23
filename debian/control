@@ -1,0 +1,28 @@
+Source: argm
+Section: database
+Priority: optional
+Maintainer: Ilya Peretyagin <ilya@brandwatch.com>
+Build-Depends: debhelper (>= 9), postgresql-server-dev-all (>= 180)
+Standards-Version: 3.9.8
+Homepage: https://github.com/BrandwatchLtd/argm
+Vcs-Git: git@github.com:BrandwatchLtd/argm.git
+Vcs-Browser: https://github.com/BrandwatchLtd/argm
+
+Package: postgresql-argm-9.4
+Architecture: any
+Depends: postgresql-9.4, ${shlibs:Depends}, ${misc:Depends}
+Description: argmin and argmax functions
+ This PostgreSQL extension proivide several aggregate functions that could be
+ used for SQL queries simplification and speedup.
+ .
+ This package contains the server extension for PostgreSQL 9.4.
+
+Package: postgresql-argm-9.6
+Architecture: any
+Depends: postgresql-9.6, ${shlibs:Depends}, ${misc:Depends}
+Description: argmin and argmax functions
+ This PostgreSQL extension proivide several aggregate functions that could be
+ used for SQL queries simplification and speedup.
+ .
+ This package contains the server extension for PostgreSQL 9.6.
+
