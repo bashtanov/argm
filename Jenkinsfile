@@ -4,7 +4,7 @@ node ('docker') {
     dir ("${WORKSPACE}/build") {
         sh "install -d ${WORKSPACE}/build";
         stage ('Fetch repository') {
-            git credentialsId: '9518243f-f5dd-4054-8420-d5da92a6da1e', url: 'git@github.com:BrandwatchLtd/argm.git', branch: 'debianization';
+            git credentialsId: '9518243f-f5dd-4054-8420-d5da92a6da1e', url: 'git@github.com:BrandwatchLtd/argm.git';
         }
         stage ('Build Docker image') {
             img = docker.build('debian8-pgsql-builder');
