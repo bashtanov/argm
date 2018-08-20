@@ -25,4 +25,6 @@ analyze tbl;
 
 select grp, argmax(txt, i, d), argmin(array[txt], (i, d)) from tbl group by grp order by grp;
 
+select argmax(1, 2) filter (where false);
+
 rollback;

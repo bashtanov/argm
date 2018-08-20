@@ -27,4 +27,10 @@ select grp, argmax(txt, i, d), argmin(array[txt], (i, d)) from tbl group by grp 
    3 | 3-11-10-2011-9999999999 | {3-11-03-2011-1111111111}
 (3 rows)
 
+select argmax(1, 2) filter (where false);
+ argmax 
+--------
+       
+(1 row)
+
 rollback;

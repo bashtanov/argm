@@ -228,7 +228,7 @@ Datum argm_finalfn(PG_FUNCTION_ARGS)
 
 	state = (ArgmState *) PG_GETARG_POINTER(0);
 	
-	if (state->keys[0].is_null)
+	if (!state || state->keys[0].is_null)
 		PG_RETURN_NULL();
 	
 	PG_RETURN_DATUM(state->keys[0].value);
