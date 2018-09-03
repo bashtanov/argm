@@ -12,10 +12,18 @@ do $$
 declare
     t text;
 begin
-    perform set_config('min_parallel_relation_size', '0', true),
-            set_config('parallel_setup_cost', '0', true),
-            set_config('parallel_tuple_cost', '0', true),
-            set_config('max_parallel_workers_per_gather', '22', true);
+    -- 9.6 and 10+ have different paramater names
+    perform set_config(param_name, '0', true)
+    from unnest('{
+       min_parallel_relation_size,
+       min_parallel_table_scan_size,
+       min_parallel_index_scan_size,
+       parallel_setup_cost,
+       parallel_tuple_cost
+    }'::text[]) param_name
+    where param_name in (select name from pg_settings);
+
+    perform set_config('max_parallel_workers_per_gather', '22', true);
 
     for t in explain select count(*) from test_data_1_20 loop
         if t like '%Gather%' then
