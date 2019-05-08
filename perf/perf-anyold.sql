@@ -7,7 +7,7 @@ begin;
 create extension argm;
 
 /* prepare data */
-create table tbl as 
+create table tbl as
 select d,
 	grp,
 	repeat('f', 2000) || grp::text grpname
