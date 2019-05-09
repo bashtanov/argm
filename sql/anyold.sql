@@ -1,9 +1,7 @@
 /*
  * FUNCTIONAL TESTS
  */
-begin;
-
-create extension argm;
+\i sql/setup/setup.sql
 
 create table tbl2 as 
 select d,
@@ -27,4 +25,4 @@ analyze tbl2;
 
 select grp, anyold(txt), sum(i) from tbl2 group by grp order by grp;
 
-rollback;
+\i sql/setup/teardown.sql
