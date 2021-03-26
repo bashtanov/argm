@@ -7,6 +7,8 @@ create extension argm;
 -- create and analyze tables (parallel plans work only on real tables, not on SRFs)
 create table test_data_1_20 as select generate_series(1,20) x;
 analyze test_data_1_20;
+create table test_data_1_200k as select generate_series(1,200000) x;
+analyze test_data_1_200k;
 -- force parallel execution and check if it works
 do $$
 declare

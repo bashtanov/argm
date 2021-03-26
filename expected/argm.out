@@ -7,6 +7,8 @@ create extension argm;
 -- create and analyze tables (parallel plans work only on real tables, not on SRFs)
 create table test_data_1_20 as select generate_series(1,20) x;
 analyze test_data_1_20;
+create table test_data_1_200k as select generate_series(1,200000) x;
+analyze test_data_1_200k;
 -- force parallel execution and check if it works
 do $$
 declare
@@ -66,6 +68,26 @@ select argmax(1, 2) filter (where false);
  argmax 
 --------
        
+(1 row)
+
+-- This way a problem with combine function called with both arguments nulls was reproduced.
+-- A bit of luck needed, as it relies on scan order.
+select argmax(x, x) filter (where x = 1) from test_data_1_200k;
+ argmax 
+--------
+      1
+(1 row)
+
+select argmax(x, x) filter (where x = 100000) from test_data_1_200k;
+ argmax 
+--------
+ 100000
+(1 row)
+
+select argmax(x, x) filter (where x = 200000) from test_data_1_200k;
+ argmax 
+--------
+ 200000
 (1 row)
 
 \i sql/setup/teardown.sql

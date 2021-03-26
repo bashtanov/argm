@@ -29,4 +29,10 @@ select grp, argmax(txt, i, d), argmin(array[txt], 1, i, d) from tbl group by grp
 
 select argmax(1, 2) filter (where false);
 
+-- This way a problem with combine function called with both arguments nulls was reproduced.
+-- A bit of luck needed, as it relies on scan order.
+select argmax(x, x) filter (where x = 1) from test_data_1_200k;
+select argmax(x, x) filter (where x = 100000) from test_data_1_200k;
+select argmax(x, x) filter (where x = 200000) from test_data_1_200k;
+
 \i sql/setup/teardown.sql

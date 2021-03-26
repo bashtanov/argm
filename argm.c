@@ -311,17 +311,25 @@ argm_combine_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
 
     GET_AGG_CONTEXT(fcinfo, aggcontext);
 
-    if (PG_ARGISNULL(1))
-        PG_RETURN_POINTER(PG_GETARG_POINTER(0));
+    state0 = PG_ARGISNULL(0) ? NULL : (ArgmState *) PG_GETARG_POINTER(0);
+    state1 = PG_ARGISNULL(1) ? NULL : (ArgmState *) PG_GETARG_POINTER(1);
+
+    if (state1 == NULL) {
+        /* just pass state0 down the line */
+        if (state0 == NULL)
+            PG_RETURN_NULL();
+        else
+            PG_RETURN_POINTER(state0);
+    }
     
+    /*
+     * okay, no fast track, we need to make a new value,
+     * either by copying state1 into relevant context or by building a new one
+     */
     oldcontext = MemoryContextSwitchTo(aggcontext);
 
-    state1 = (ArgmState *) PG_GETARG_POINTER(1);
-
-    if (PG_ARGISNULL(0))
+    if (state0 == NULL)
     {
-        state0 = palloc(sizeof(ArgmState));
-        
         /* Copy data (1 --> 0) across memory contexts */
         state0 = init_state(state1->key_count);
         copy_state_keys(state0, state1);
@@ -330,7 +338,6 @@ argm_combine_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
     {
         int preference = 0;
         int i;
-        state0 = (ArgmState *) PG_GETARG_POINTER(0);
 
         /*
          * compare the stored keys of state0 and state1 lexicographically
