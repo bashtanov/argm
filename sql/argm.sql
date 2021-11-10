@@ -35,4 +35,7 @@ select argmax(x, x) filter (where x = 1) from test_data_1_200k;
 select argmax(x, x) filter (where x = 100000) from test_data_1_200k;
 select argmax(x, x) filter (where x = 200000) from test_data_1_200k;
 
+-- string comparison test
+select argmax(x::text, x::text) = max(x::text) are_equal from (select relname x from pg_class) _;
+
 \i sql/setup/teardown.sql

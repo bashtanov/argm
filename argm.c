@@ -92,13 +92,13 @@ static void copy_state_keys(ArgmState *state_dst, ArgmState *state_src);
 
 static int compare_one_key(ArgmDatumWithMetadata *old,
                            bool new_is_null, Datum new_datum,
-                           Oid collation, int compareFunctionResultToAdvance);
+                           Oid collation, int compareFunctionSignToAdvance);
 
 static Datum argm_transfn_universal(PG_FUNCTION_ARGS,
-                                    int32 compareFunctionResultToAdvance);
+                                    int32 compareFunctionSignToAdvance);
 
 static Datum argm_combine_universal(PG_FUNCTION_ARGS,
-                                    int32 compareFunctionResultToAdvance);
+                                    int32 compareFunctionSignToAdvance);
 
 static bytea *datum2binary(Datum datum, Oid type);
 
@@ -175,8 +175,11 @@ static void copy_state_keys(ArgmState *state_dst, ArgmState *state_src)
  */
 static int compare_one_key(ArgmDatumWithMetadata *old,
             bool new_is_null, Datum new_datum,
-            Oid collation, int compareFunctionResultToAdvance)
+            Oid collation, int compareFunctionSignToAdvance)
 {
+    int comparisonResult;
+    int comparisonResultSign;
+
     if (new_is_null && old->is_null)
         return 0;
     /* nulls last */
@@ -186,12 +189,14 @@ static int compare_one_key(ArgmDatumWithMetadata *old,
     if (!new_is_null && old->is_null)
         return 1;
 
-    return DatumGetInt32(OidFunctionCall2Coll(
+    comparisonResult = DatumGetInt32(OidFunctionCall2Coll(
         old->metadata.cmp_proc,
         collation,
         new_datum,
         old->value
-    )) * compareFunctionResultToAdvance;
+    ));
+    comparisonResultSign = (comparisonResult > 0) - (comparisonResult < 0);
+    return comparisonResultSign * compareFunctionSignToAdvance;
 }
 /*
  * The function args are the following:
@@ -200,7 +205,7 @@ static int compare_one_key(ArgmDatumWithMetadata *old,
  *   2, 3, ... -- keys
  */
 static Datum
-argm_transfn_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
+argm_transfn_universal(PG_FUNCTION_ARGS, int32 compareFunctionSignToAdvance)
 {
     Oid           type;
     ArgmState    *state;
@@ -269,13 +274,13 @@ argm_transfn_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
                 PG_ARGISNULL(i + 1),
                 PG_GETARG_DATUM(i + 1),
                 PG_GET_COLLATION(),
-                compareFunctionResultToAdvance
+                compareFunctionSignToAdvance
             );
             /* no need to compare further values, keep current state */
-            if (preference == -1)
+            if (preference < 0)
                 break;
             /* no need to compare further values, copy new state */
-            if (preference == 1) {
+            if (preference > 0) {
                 need_copy = true;
                 need_free_old = true;
                 break;
@@ -302,7 +307,7 @@ argm_transfn_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
 }
 
 static Datum
-argm_combine_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
+argm_combine_universal(PG_FUNCTION_ARGS, int32 compareFunctionSignToAdvance)
 {
     MemoryContext aggcontext,
                   oldcontext;
@@ -349,7 +354,7 @@ argm_combine_universal(PG_FUNCTION_ARGS, int32 compareFunctionResultToAdvance)
                 state1->keys[i].is_null,
                 state1->keys[i].value,
                 PG_GET_COLLATION(),
-                compareFunctionResultToAdvance
+                compareFunctionSignToAdvance
             );
             /* no need to compare further values, as we have a defined result */
             if (preference != 0)
