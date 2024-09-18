@@ -1,5 +1,10 @@
 #include "postgres.h"
 #include "fmgr.h"
+
+#if PG_VERSION_NUM >= 160000
+    #include "varatt.h"
+#endif
+
 #include "lib/stringinfo.h"
 #include "libpq/pqformat.h"
 #include "utils/datum.h"
